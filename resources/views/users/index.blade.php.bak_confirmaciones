@@ -118,7 +118,7 @@
                                     Editar
                                 </a>
 
-                                <form method="POST" action="{{ route('users.toggle', $user->id) }}" onsubmit="return confirm('¿Confirmas cambiar el estado de este usuario?');">
+                                <form method="POST" action="{{ route('users.toggle', $user->id) }}">
                                     @csrf
                                     <button type="submit"
                                             class="px-3 py-1 bg-gray-100 text-gray-800 rounded-md text-xs hover:bg-gray-200">
@@ -126,7 +126,7 @@
                                     </button>
                                 </form>
 
-                                <form method="POST" action="{{ route('users.reset', $user->id) }}" onsubmit="return confirm('¿Confirmas resetear la contraseña de este usuario?');">
+                                <form method="POST" action="{{ route('users.reset', $user->id) }}">
                                     @csrf
                                     <button type="submit"
                                             class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-md text-xs hover:bg-indigo-200">
@@ -152,4 +152,3 @@
     </div>
 </div>
 @endsection
-
