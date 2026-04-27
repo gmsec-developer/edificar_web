@@ -1,86 +1,154 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
+<div class="mb-6 flex items-center justify-between">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Gestión de usuarios</h1>
+        <p class="text-sm text-gray-500">Administra usuarios, roles y estados de acceso.</p>
+    </div>
 
-    @if(session('success'))
-        <div class="bg-green-200 text-green-800 p-3 mb-4 rounded">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    <a href="{{ route('users.create') }}" class="bg-green-600 text-white px-3 py-1 rounded">
-        Nuevo Usuario
+    <a href="{{ route('users.create') }}"
+       class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700">
+        Nuevo usuario
     </a>
+</div>
 
-    <h1 class="text-2xl font-bold mb-4 mt-4">Usuarios</h1>
+@if (session('success'))
+    <div class="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-700">
+        {{ session('success') }}
+    </div>
+@endif
 
-    <table class="w-full bg-white shadow rounded">
-        <thead class="bg-gray-200">
-            <tr>
-                <th class="p-2 text-left">ID</th>
-                <th class="p-2 text-left">Nombre</th>
-                <th class="p-2 text-left">Email</th>
-                <th class="p-2 text-center">Estado</th>
-                <th class="p-2 text-center">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($users as $user)
-                <tr class="border-t">
-                    <td class="p-2">{{ $user->id }}</td>
-                    <td class="p-2">{{ $user->name }}</td>
-                    <td class="p-2">{{ $user->email }}</td>
-                    <td class="p-2 text-center">
-                        @if($user->is_active)
-                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-sm">Activo</span>
-                        @else
-                            <span class="bg-red-100 text-red-700 px-2 py-1 rounded text-sm">Inactivo</span>
-                        @endif
-                    </td>
+<div class="bg-white shadow rounded-lg p-6">
+    <form method="GET" action="{{ route('users.index') }}" class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+            <input type="text"
+                   name="search"
+                   value="{{ request('search') }}"
+                   placeholder="Nombre o correo"
+                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        </div>
 
-                    <td class="p-2 text-center">
-                        <div class="flex justify-center items-center gap-2">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+            <select name="status"
+                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <option value="">Todos</option>
+                <option value="active" @selected(request('status') === 'active')>Activos</option>
+                <option value="inactive" @selected(request('status') === 'inactive')>Inactivos</option>
+            </select>
+        </div>
 
-                            <a href="{{ route('users.edit', $user->id) }}"
-                               class="bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center justify-center h-8">
-                                Editar
-                            </a>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+            <select name="role"
+                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <option value="">Todos</option>
+                @foreach ($roles as $role)
+                    <option value="{{ $role->name }}" @selected(request('role') === $role->name)>
+                        {{ $role->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
 
-                            @if(!$user->hasRole('superadmin'))
-                                <form method="POST" action="{{ route('users.toggle', $user->id) }}" class="m-0 p-0">
+        <div class="flex items-end gap-2">
+            <button type="submit"
+                    class="px-4 py-2 bg-gray-800 text-white rounded-md text-sm hover:bg-gray-700">
+                Filtrar
+            </button>
+
+            <a href="{{ route('users.index') }}"
+               class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200">
+                Limpiar
+            </a>
+        </div>
+    </form>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Correo</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Roles</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody class="bg-white divide-y divide-gray-200">
+                @forelse ($users as $user)
+                    <tr>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                            {{ $user->name }}
+                        </td>
+
+                        <td class="px-4 py-3 text-sm text-gray-600">
+                            {{ $user->email }}
+                        </td>
+
+                        <td class="px-4 py-3 text-sm text-gray-600">
+                            @forelse ($user->roles as $role)
+                                <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
+                                    {{ $role->name }}
+                                </span>
+                            @empty
+                                <span class="text-gray-400">Sin rol</span>
+                            @endforelse
+                        </td>
+
+                        <td class="px-4 py-3 text-sm">
+                            @if ($user->status === 'active')
+                                <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
+                                    Activo
+                                </span>
+                            @else
+                                <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700">
+                                    Inactivo
+                                </span>
+                            @endif
+                        </td>
+
+                        <td class="px-4 py-3 text-sm text-right">
+                            <div class="flex justify-end gap-2">
+                                <a href="{{ route('users.edit', $user) }}"
+                                   class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-md text-xs hover:bg-yellow-200">
+                                    Editar
+                                </a>
+
+                                <form method="POST" action="{{ route('users.toggle', $user->id) }}">
                                     @csrf
                                     <button type="submit"
-                                        class="{{ $user->is_active ? 'bg-yellow-500' : 'bg-green-600' }} text-white px-3 py-1 rounded text-sm flex items-center justify-center h-8">
-                                        {{ $user->is_active ? 'Desactivar' : 'Activar' }}
+                                            class="px-3 py-1 bg-gray-100 text-gray-800 rounded-md text-xs hover:bg-gray-200">
+                                        {{ $user->status === 'active' ? 'Desactivar' : 'Activar' }}
                                     </button>
                                 </form>
 
-                                <form method="POST" action="{{ route('users.reset', $user->id) }}" class="m-0 p-0">
+                                <form method="POST" action="{{ route('users.reset', $user->id) }}">
                                     @csrf
                                     <button type="submit"
-                                        onclick="return confirm('¿Resetear contraseña?')"
-                                        class="bg-purple-600 text-white px-3 py-1 rounded text-sm flex items-center justify-center h-8">
+                                            class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-md text-xs hover:bg-indigo-200">
                                         Reset
                                     </button>
                                 </form>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="px-4 py-6 text-center text-gray-500">
+                            No se encontraron usuarios.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 
-                                <form method="POST" action="{{ route('users.destroy', $user->id) }}" class="m-0 p-0">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                        onclick="return confirm('Â¿Seguro que deseas eliminar este usuario?')"
-                                        class="bg-red-600 text-white px-3 py-1 rounded text-sm flex items-center justify-center h-8">
-                                        Eliminar
-                                    </button>
-                                </form>
-                            @endif
-
-                        </div>
-                    </td>
-
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-
+    <div class="mt-6">
+        {{ $users->links() }}
+    </div>
+</div>
 @endsection
