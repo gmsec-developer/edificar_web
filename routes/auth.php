@@ -10,11 +10,18 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->middleware(['guest', 'check.register'])
-        ->name('register');
+    Route::get('register', function () {
+        $setting = DB::table('settings')->where('key', 'allow_register')->first();
+
+        if ($setting && $setting->value === 'false') {
+            abort(403);
+        }
+
+        return app(RegisteredUserController::class)->create();
+    })->name('register');
 
     Route::post('register', [RegisteredUserController::class, 'store'])
         ->middleware(['guest', 'check.register']);

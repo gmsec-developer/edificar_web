@@ -68,3 +68,15 @@ Route::middleware(['auth', 'permission:settings.view'])
     ->name('activity.index');
 
 require __DIR__.'/auth.php';
+
+Route::post('notifications/read', function () {
+    \Spatie\Activitylog\Models\Activity::where('causer_id', auth()->id())
+        ->update(['is_read' => true]);
+
+    return back();
+})->name('notifications.read')->middleware('auth');
+
+Route::middleware(['auth', 'permission:settings.edit'])->group(function () {
+    Route::get('settings', [App\Http\Controllers\SettingController::class, 'index'])->name('settings.index');
+    Route::post('settings', [App\Http\Controllers\SettingController::class, 'update'])->name('settings.update');
+});

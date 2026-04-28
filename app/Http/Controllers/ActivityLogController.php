@@ -7,12 +7,26 @@ use Spatie\Activitylog\Models\Activity;
 
 class ActivityLogController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $logs = Activity::with('causer')
-            ->latest()
-            ->paginate(15);
+        $query = \Spatie\Activitylog\Models\Activity::with('causer')->latest();
 
-        return view('activity.index', compact('logs'));
+        if ($request->filled('user')) {
+            $query->where('causer_id', $request->user);
+        }
+
+        if ($request->filled('from')) {
+            $query->whereDate('created_at', '>=', $request->from);
+        }
+
+        if ($request->filled('to')) {
+            $query->whereDate('created_at', '<=', $request->to);
+        }
+
+        $logs = $query->paginate(15);
+
+        $users = \App\Models\User::pluck('name', 'id');
+
+        return view('activity.index', compact('logs', 'users'));
     }
 }

@@ -4,6 +4,25 @@
 <h1 class="text-2xl font-bold mb-6">Historial del sistema</h1>
 
 <div class="bg-white shadow rounded-lg p-6">
+
+    <form method="GET" class="mb-4 flex gap-2 flex-wrap">
+        <select name="user" class="border p-2 rounded">
+            <option value="">Todos los usuarios</option>
+            @foreach ($users as $id => $name)
+                <option value="{{ $id }}" @selected(request('user') == $id)>
+                    {{ $name }}
+                </option>
+            @endforeach
+        </select>
+
+        <input type="date" name="from" value="{{ request('from') }}" class="border p-2 rounded">
+        <input type="date" name="to" value="{{ request('to') }}" class="border p-2 rounded">
+
+        <button class="bg-indigo-600 text-white px-4 py-2 rounded">
+            Filtrar
+        </button>
+    </form>
+
     <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
             <tr>
