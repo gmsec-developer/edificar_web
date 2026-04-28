@@ -1,12 +1,12 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/dashboard', function () {
@@ -19,11 +19,48 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
-
-Route::middleware(['auth', 'role:superadmin'])->group(function () {
-    Route::post('users/{id}/toggle', [UserController::class, 'toggle'])->name('users.toggle');
-    Route::post('users/{id}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset');
-    Route::resource('users', UserController::class);
-    Route::resource('roles', RoleController::class);
+Route::middleware(['auth', 'permission:users.view'])->group(function () {
+    Route::get('users', [UserController::class, 'index'])->name('users.index');
 });
+
+Route::middleware(['auth', 'permission:users.create'])->group(function () {
+    Route::get('users/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('users', [UserController::class, 'store'])->name('users.store');
+});
+
+Route::middleware(['auth', 'permission:users.edit'])->group(function () {
+    Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
+});
+
+Route::middleware(['auth', 'permission:users.delete'])->group(function () {
+    Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+});
+
+Route::middleware(['auth', 'permission:users.toggle'])->group(function () {
+    Route::post('users/{id}/toggle', [UserController::class, 'toggle'])->name('users.toggle');
+});
+
+Route::middleware(['auth', 'permission:users.reset'])->group(function () {
+    Route::post('users/{id}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset');
+});
+
+Route::middleware(['auth', 'permission:roles.view'])->group(function () {
+    Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
+});
+
+Route::middleware(['auth', 'permission:roles.create'])->group(function () {
+    Route::get('roles/create', [RoleController::class, 'create'])->name('roles.create');
+    Route::post('roles', [RoleController::class, 'store'])->name('roles.store');
+});
+
+Route::middleware(['auth', 'permission:roles.edit'])->group(function () {
+    Route::get('roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
+    Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+});
+
+Route::middleware(['auth', 'permission:roles.delete'])->group(function () {
+    Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+});
+
+require __DIR__.'/auth.php';

@@ -22,7 +22,7 @@ class UserController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->where('is_active', $request->status === 'active' ? 1 : 0);
+            $query->where('status', $request->status);
         }
 
         if ($request->filled('role')) {
@@ -128,15 +128,15 @@ class UserController extends Controller
 
         if ($user->hasRole('superadmin')) {
             return redirect()->route('users.index')
-                ->with('success', 'No puedes resetear la clave de un superadmin');
+                ->with('success', 'No puedes resetear un superadmin');
         }
 
         $newPassword = \Illuminate\Support\Str::random(8);
 
-        $user->password = Hash::make($newPassword);
+        $user->password = \Illuminate\Support\Facades\Hash::make($newPassword);
         $user->save();
 
         return redirect()->route('users.index')
-            ->with('success', 'Nueva clave generada: ' . $newPassword);
+            ->with('success', 'Nueva contraseÃƒÂ±a: ' . $newPassword);
     }
 }
