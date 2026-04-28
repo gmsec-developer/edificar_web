@@ -63,4 +63,8 @@ Route::middleware(['auth', 'permission:roles.delete'])->group(function () {
     Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
 });
 
+Route::middleware(['auth', 'permission:settings.view'])
+    ->get('activity-log', [App\Http\Controllers\ActivityLogController::class, 'index'])
+    ->name('activity.index');
+
 require __DIR__.'/auth.php';

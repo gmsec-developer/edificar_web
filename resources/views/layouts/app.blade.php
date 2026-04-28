@@ -14,23 +14,62 @@
 
         <nav class="space-y-2">
             <a href="{{ route('dashboard') }}" class="block px-3 py-2 rounded hover:bg-gray-800">Dashboard</a>
-            <a href="#" class="block px-3 py-2 rounded hover:bg-gray-800">Usuarios</a>
-            <a href="#" class="block px-3 py-2 rounded hover:bg-gray-800">Roles</a>
-            <a href="#" class="block px-3 py-2 rounded hover:bg-gray-800">Configuración</a>
+
+            @can('users.view')
+                <a href="{{ route('users.index') }}" class="block px-3 py-2 rounded hover:bg-gray-800">Usuarios</a>
+            @endcan
+
+            @can('roles.view')
+                <a href="{{ route('roles.index') }}" class="block px-3 py-2 rounded hover:bg-gray-800">Roles</a>
+            @endcan
+
+            @can('settings.view')
+                <a href="{{ route('activity.index') }}" class="block px-3 py-2 rounded hover:bg-gray-800">Auditoria</a>
+            @endcan
+
+            @can('settings.view')
+                <a href="#" class="block px-3 py-2 rounded hover:bg-gray-800">Configuracion</a>
+            @endcan
         </nav>
     </aside>
 
     <main class="flex-1">
-        <header class="bg-white shadow px-6 py-4 flex justify-between items-center">
-            <span class="font-semibold text-gray-700">Panel Administrativo</span>
+ 	<header class="bg-white shadow px-6 py-4 flex justify-between items-center">
+    	<span class="font-semibold text-gray-700">Panel Administrativo</span>
 
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button class="text-sm text-red-600 hover:underline">
-                    Cerrar sesión
-                </button>
-            </form>
-        </header>
+    	<div class="flex items-center gap-4">
+
+        	<!-- Usuario -->
+        <div class="flex items-center gap-3">
+            	@php
+               	 $user = auth()->user();
+                	$initials = strtoupper(substr($user->name, 0, 1));
+            @endphp
+
+            @if ($user->avatar)
+                <img src="{{ asset('storage/' . $user->avatar) }}"
+     style="width:40px; height:40px; max-width:40px; max-height:40px; border-radius:9999px; object-fit:cover; border:2px solid #6366f1;">
+            @else
+                <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">
+                    {{ $initials }}
+                </div>
+            @endif
+
+            <span class="text-sm font-medium text-gray-700">
+                {{ $user->name }}
+            </span>
+        </div>
+
+        <!-- Logout -->
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button class="text-sm text-red-600 hover:underline">
+                Cerrar sesión
+            </button>
+        </form>
+
+    </div>
+</header>
 
         <section class="p-6">
             @yield('content')
