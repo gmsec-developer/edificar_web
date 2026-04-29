@@ -96,7 +96,8 @@ class UserController extends Controller
             'avatar' => ['nullable', 'image', 'max:2048'],
         ]);
 
-        $oldData = $user->getOriginal();
+        $oldData = $user->only(['name', 'email', 'is_active', 'avatar']);
+        $oldData['role'] = $user->roles->pluck('name')->first();
 
         $avatarPath = $user->avatar;
 
@@ -121,7 +122,10 @@ class UserController extends Controller
             ->performedOn($user)
             ->withProperties([
                 'old' => $oldData,
-                'new' => $user->getAttributes(),
+                'new' => array_merge(
+                    $user->only(['name', 'email', 'is_active', 'avatar']),
+                    ['role' => $request->role]
+                ),
             ])
             ->log('Actualizo usuario: ' . $user->email);
 
